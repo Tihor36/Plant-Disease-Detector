@@ -77,9 +77,12 @@ def get_gradcam(model, img_array, layer_name):
         inputs=model.input,
         outputs=[model.get_layer(layer_name).output, model.output],
     )
+    img_tensor = tf.cast(img_array, tf.float32)
     with tf.GradientTape() as tape:
-        conv_outputs, predictions = grad_model(img_array)
-        pred_index = tf.argmax(predictions[0])
+        results = grad_model(img_tensor)
+        conv_outputs = tf.convert_to_tensor(results[0])
+        predictions = tf.convert_to_tensor(results[-1])
+        pred_index = int(tf.argmax(predictions[0]))
         class_score = predictions[:, pred_index]
 
     grads = tape.gradient(class_score, conv_outputs)
@@ -97,11 +100,14 @@ def get_gradcampp(model, img_array, layer_name):
         inputs=model.input,
         outputs=[model.get_layer(layer_name).output, model.output],
     )
+    img_tensor = tf.cast(img_array, tf.float32)
     with tf.GradientTape() as tape1:
         with tf.GradientTape() as tape2:
             with tf.GradientTape() as tape3:
-                conv_out, preds = grad_model(img_array)
-                pred_class = tf.argmax(preds[0])
+                results = grad_model(img_tensor)
+                conv_out = tf.convert_to_tensor(results[0])
+                preds = tf.convert_to_tensor(results[-1])
+                pred_class = int(tf.argmax(preds[0]))
                 score = preds[:, pred_class]
             g1 = tape3.gradient(score, conv_out)
         g2 = tape2.gradient(g1, conv_out)
@@ -227,6 +233,4 @@ if uploaded_file is not None:
                 st.error(f"LIME failed: {e}")
 
         st.success("✅ XAI visualizations generated!")
-
-
 
