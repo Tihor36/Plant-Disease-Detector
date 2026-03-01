@@ -1,0 +1,9 @@
+streamlit
+gdown
+tensorflow
+numpy
+pillow
+opencv-python-headless
+matplotlib
+lime
+scikit-image
