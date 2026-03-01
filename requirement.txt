@@ -1,9 +1,10 @@
 streamlit
 gdown
-tensorflow
+tensorflow-cpu
 numpy
 pillow
 opencv-python-headless
 matplotlib
 lime
 scikit-image
+
