@@ -8,19 +8,14 @@ from PIL import Image
 from lime import lime_image
 from skimage.segmentation import mark_boundaries
 
-# =====================================================================
-# PAGE CONFIG
-# =====================================================================
+
 st.set_page_config(
     page_title="Plant Disease Classifier",
     page_icon="🌿",
     layout="wide",
 )
 
-# =====================================================================
-# MODEL LOADING
-# FIX 1: .pkl files must be loaded with pickle, NOT tf.keras.models.load_model
-# =====================================================================
+
 MODEL_PATH = "mob_res_se_final.pkl"
 GDRIVE_FILE_ID = "1p957K5Mf0ni1Ge4HUbmrGQVZ400bmPeR"
 
@@ -28,7 +23,7 @@ GDRIVE_FILE_ID = "1p957K5Mf0ni1Ge4HUbmrGQVZ400bmPeR"
 def load_prediction_model():
     import gdown
     if not os.path.exists(MODEL_PATH):
-        url = f"https://drive.google.com/uc?id=https://drive.google.com/file/d/1p957K5Mf0ni1Ge4HUbmrGQVZ400bmPeR/view?usp=sharing"
+        url = f"https://drive.google.com/uc?id={GDRIVE_FILE_ID}"
         gdown.download(url, MODEL_PATH, quiet=False)
     with open(MODEL_PATH, "rb") as f:
         model = pickle.load(f)
@@ -36,9 +31,7 @@ def load_prediction_model():
 
 model = load_prediction_model()
 
-# =====================================================================
-# CLASS NAMES (PlantVillage 38 classes — sorted alphabetically)
-# =====================================================================
+
 class_names = [
     "Apple___Apple_scab", "Apple___Black_rot", "Apple___Cedar_apple_rust", "Apple___healthy",
     "Blueberry___healthy", "Cherry___Powdery_mildew", "Cherry___healthy",
@@ -60,9 +53,7 @@ class_names = [
     "Tomato___healthy",
 ]
 
-# =====================================================================
-# HELPER: find the right conv layers for Grad-CAM in our dual-path model
-# =====================================================================
+
 def find_gradcam_layers(model):
     """
     Returns (path1_layer, path2_layer).
@@ -79,9 +70,7 @@ def find_gradcam_layers(model):
     return path1_layer, path2_layer
 
 
-# =====================================================================
-# GRAD-CAM
-# =====================================================================
+
 def get_gradcam(model, img_array, layer_name):
     """Standard Grad-CAM heatmap for a given layer."""
     grad_model = tf.keras.Model(
@@ -101,10 +90,7 @@ def get_gradcam(model, img_array, layer_name):
     return heatmap.numpy()
 
 
-# =====================================================================
-# GRAD-CAM++
-# FIX 2: Full implementation instead of a placeholder
-# =====================================================================
+
 def get_gradcampp(model, img_array, layer_name):
     """Grad-CAM++ with higher-order gradients for better localization."""
     grad_model = tf.keras.Model(
@@ -132,9 +118,7 @@ def get_gradcampp(model, img_array, layer_name):
     return heatmap.numpy()
 
 
-# =====================================================================
-# OVERLAY HEATMAP ON IMAGE
-# =====================================================================
+
 def overlay_heatmap(heatmap, img, alpha=0.4):
     """Resize heatmap and overlay on the original image. Returns float [0,1]."""
     heatmap_resized = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
@@ -144,9 +128,7 @@ def overlay_heatmap(heatmap, img, alpha=0.4):
     return np.clip(overlay, 0, 1)
 
 
-# =====================================================================
-# STREAMLIT UI
-# =====================================================================
+
 st.title("🌿 Plant Disease Classifier & XAI Evaluator")
 st.write("Upload a leaf image to predict the disease and visualize model attention.")
 
@@ -245,4 +227,6 @@ if uploaded_file is not None:
                 st.error(f"LIME failed: {e}")
 
         st.success("✅ XAI visualizations generated!")
+
+
 
