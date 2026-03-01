@@ -14,7 +14,7 @@ import os
 @st.cache_resource
 def load_prediction_model():
     # .pkl file handle (Assuming it was saved as a Keras model)
-    model = with open... pickle.load('mob_res_se_final.pkl')
+    model = tf.keras.models.load_model('mob_res_se_final.pkl')
     return model
 
 model = load_prediction_model()
@@ -113,5 +113,6 @@ if uploaded_file is not None:
             st.info("Grad-CAM++ requires second-order gradients. Showing LIME focus.")
 
             st.image(mask, caption="LIME Mask")
+
 
 
